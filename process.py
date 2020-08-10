@@ -108,6 +108,8 @@ class Process:
                 except IndexError as e:
                     self.logs['invalid_runs_found'] += 1
                     continue
+                except KeyError as e:
+                    self.logs['invalid_runs_found'] += 1
 
             if len(processed_runs) > batch_size:
                 logger.info('Saving batch')

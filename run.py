@@ -138,7 +138,6 @@ class Run:
             fight_data['entering_hp'] = self.run['current_hp_per_floor'][floor - 2] if floor > 1 else min(self.run['current_hp_per_floor'][0] + battle_stat['damage'], self.run['max_hp_per_floor'][0])
             fight_data['character'] = self.run['character_chosen']
             fight_data['ascension'] = self.run['ascension_level']
-            fight_data['enemies'] = battle_stat['enemies']
             fight_data['floor'] = floor
             fight_data['damage_taken'] = self.get_hp_change(battle_stat, floor)
             next_boss_floor, fight_data['next_boss'] = self.get_next_boss(floor)
