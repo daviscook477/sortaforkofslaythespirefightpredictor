@@ -140,6 +140,7 @@ class Run:
             fight_data['ascension'] = self.run['ascension_level']
             fight_data['floor'] = floor
             fight_data['damage_taken'] = self.get_hp_change(battle_stat, floor)
+            fight_data['encounter'] = battle_stat['enemies']
             next_boss_floor, fight_data['next_boss'] = self.get_next_boss(floor)
             fight_data['score'] = self.end_game_stats['score']
             fight_data['won'] = self.end_game_stats['won']
