@@ -33,6 +33,7 @@ class Run:
         #print(self.current_relics)
         ascension = self.run['ascension_level']
         self.processed_fights = []
+        self.processed_card_choices = []
         self.unknowns = {'unknown_removes_by_floor': {}, 'unknown_upgrades_by_floor': {},
                          'unknown_transforms_by_floor': {}, 'unknown_cards_by_floor': {}, }
 
@@ -121,7 +122,7 @@ class Run:
             self.process_purchases(floor)
             self.process_purges(floor)
             self.process_events(floor)
-        return self.processed_fights
+        return self.processed_card_choices
 
 
     def process_battle(self, floor):
@@ -212,6 +213,8 @@ class Run:
         card_choice_data = self.stats_by_floor['card_choices_by_floor'].get(floor)
         if card_choice_data:
             picked_card = card_choice_data['picked']
+            card_choice_event = {}
+            card_choice_event['deck'] = self.current_deck
             if picked_card != 'SKIP' and picked_card != 'Singing Bowl':
                 if 'Molten Egg 2' in self.current_relics and picked_card in StSGlobals.BASE_GAME_ATTACKS and picked_card[-2] != '+1':
                     picked_card += '+1'
@@ -220,6 +223,12 @@ class Run:
                 if 'Frozen Egg 2' in self.current_relics and picked_card in StSGlobals.BASE_GAME_POWERS and picked_card[-2] != '+1':
                     picked_card += '+1'
                 self.current_deck.append(picked_card)
+            card_choice_event['picked'] = picked_card
+            card_choice_event['not_picked'] = card_choice_data['not_picked']
+            # card_choice_event['character'] = self.run['character_chosen']
+            # card_choice_event['ascension'] = self.run['ascension_level']
+            card_choice_event['floor'] = floor
+            self.processed_card_choices.append(card_choice_event)
 
     def process_campfire_choice(self, floor):
         campfire_data = self.stats_by_floor['campfire_choices_by_floor'].get(floor)

@@ -142,9 +142,14 @@ class Process:
 
         # Modded games
         key = 'character_chosen'
-        if run.get(key) not in StSGlobals.BASE_GAME_CHARACTERS:
+        if run.get(key) not in ['IRONCLAD']: #not in StSGlobals.BASE_GAME_CHARACTERS:
             logger.debug('Does not have base game character')
             return True
+
+        # Low ascension
+        key = 'ascension_level'
+        if int(run.get(key)) < 15:
+            return True 
 
         key = 'master_deck'
         if set(run.get(key, {'Empty Set'})).issubset(StSGlobals.BASE_GAME_CARDS_AND_UPGRADES) is False:
