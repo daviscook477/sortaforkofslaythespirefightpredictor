@@ -12,7 +12,7 @@ logger = logging.getLogger('main')
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-r', '--run-directory', default='StSRuns', help='File path to directory of runs')
+    parser.add_argument('-r', '--run-directory', default=r'C:\Users\davis\Documents\Slay the Spire Data', help='File path to directory of runs')
     parser.add_argument('--num-processes', default=None,
                         help='Number of processes to spawn, defaults to number of CPU cores')
     args = parser.parse_args()

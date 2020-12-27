@@ -3,11 +3,13 @@ import json
 import logging
 import re
 import sys
+import os
 from datetime import date
 from itertools import chain
 from multiprocessing import Pool, Manager
 from pathlib import Path, PosixPath
 from typing import List, Tuple
+from json import JSONDecodeError
 
 from tqdm import tqdm
 
@@ -34,7 +36,12 @@ class Process:
         self.date = date.today()
 
     def get_file_list(self):
-        return [path for path in Path(self.run_directory).rglob('*.run')]
+        run_globs = [path for path in Path(self.run_directory).glob('**/*.json')]
+        run_files = []
+        for glob in run_globs:
+            if (os.path.isfile(glob)):
+                run_files.append(glob)
+        return run_files
 
     def get_logs(self):
         """
@@ -55,7 +62,7 @@ class Process:
         # Break up files for each process
         run_chunks = self.chunks(self.run_list, self.num_processes)
 
-        output_dir = Path(f'out/{self.date}')
+        output_dir = Path(f'C:/Users/davis/Documents/Slay the Spire Runs/{self.date}')
         output_dir.mkdir(exist_ok=True, parents=True)
 
         logger.info(f'Starting {self.num_processes} processes')
@@ -86,36 +93,43 @@ class Process:
         for i in range(num_chunks):
             yield long_list[i::num_chunks]
 
-    def process_chunk(self, input_data: Tuple[List, int, PosixPath], batch_size: int = 10000):
+    def process_chunk(self, input_data: Tuple[List, int, PosixPath], batch_size: int = 1000):
         chunk, process_id, output_dir = input_data
         processed_runs = []
+        batch_count = 0
         for run_path in tqdm(chunk):
-            run = self.load_run(run_path)
-            if self.is_bad_file(run):
-                self.logs['bad_file_count'] += 1
-            else:
-                try:
-                    processed_runs.append(Run(run).process_run())
-                    self.logs['file_processed_count'] += 1
-                # Just pass all the exceptions we know about
-                except InvalidRunError:
-                    self.logs['invalid_runs_found'] += 1
-                    continue
-                except RuntimeError as e:
-                    self.logs['file_master_not_match_count'] += 1
-                    logger.debug(f'{run_path}\n')
-                    continue
-                except IndexError as e:
-                    self.logs['invalid_runs_found'] += 1
-                    continue
-                except KeyError as e:
-                    self.logs['invalid_runs_found'] += 1
+            try:
+                runs = self.load_run(run_path)
+            except JSONDecodeError:
+                continue
+            for run in runs:
+                run = run['event']
+                if self.is_bad_file(run):
+                    self.logs['bad_file_count'] += 1
+                else:
+                    try:
+                        processed_runs.append(Run(run).process_run())
+                        self.logs['file_processed_count'] += 1
+                    # Just pass all the exceptions we know about
+                    except InvalidRunError:
+                        self.logs['invalid_runs_found'] += 1
+                        continue
+                    except RuntimeError as e:
+                        self.logs['file_master_not_match_count'] += 1
+                        logger.debug(f'{run_path}\n')
+                        continue
+                    except IndexError as e:
+                        self.logs['invalid_runs_found'] += 1
+                        continue
+                    except KeyError as e:
+                        self.logs['invalid_runs_found'] += 1
 
-            if len(processed_runs) > batch_size:
-                logger.info('Saving batch')
-                self.write_file(processed_runs, f'{output_dir}/data_{self.date}_{process_id}.json')
-                logger.info(f'Wrote batch {process_id} of size {batch_size} to file')
-                processed_runs = []
+                if len(processed_runs) > batch_size:
+                    logger.info('Saving batch')
+                    self.write_file(processed_runs, f'{output_dir}/data_{self.date}_{process_id}_{batch_count}.json')
+                    logger.info(f'Wrote batch {batch_count} for process {process_id} of size {batch_size} to file')
+                    processed_runs = []
+                    batch_count += 1
 
         self.write_file(processed_runs, f'{output_dir}/data_{self.date}_{process_id}.json')
         print(self.logs)
@@ -142,14 +156,9 @@ class Process:
 
         # Modded games
         key = 'character_chosen'
-        if run.get(key) not in ['IRONCLAD']: #not in StSGlobals.BASE_GAME_CHARACTERS:
+        if run.get(key) not in StSGlobals.BASE_GAME_CHARACTERS:
             logger.debug('Does not have base game character')
             return True
-
-        # Low ascension
-        key = 'ascension_level'
-        if int(run.get(key)) < 15:
-            return True 
 
         key = 'master_deck'
         if set(run.get(key, {'Empty Set'})).issubset(StSGlobals.BASE_GAME_CARDS_AND_UPGRADES) is False:
@@ -222,6 +231,18 @@ class Process:
         key = 'player_experience'
         if run.get(key, 1) < 10:
             logger.debug('Player stinks')
+            return True
+
+        # low ascension level
+        key = 'ascension_level'
+        if run.get(key, 1) < 15:
+            logger.debug('Low ascension')
+            return True
+
+        # losses
+        key = 'floor_reached'
+        if run.get(key, 1) < 50:
+            logger.debug('Lost run')
             return True
 
     def valid_build_number(self, string, character):

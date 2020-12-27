@@ -11,8 +11,8 @@ logger = logging.getLogger('main')
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-r', '--run-directory', default='GDriveSpireLogs', help='File path to directory of run log files')
-    parser.add_argument('-o', '--output-directory', default='StSRuns', help='File path to directory where individual runs are output')
+    parser.add_argument('-r', '--run-directory', default=r'C:\Users\davis\Documents\Slay the Spire Data', help='File path to directory of run log files')
+    parser.add_argument('-o', '--output-directory', default=r'C:\Users\davis\Documents\Slay the Spire Runs', help='File path to directory where individual runs are output')
     args = parser.parse_args()
 
     # Where StS combined run logs are stored as '.json' files
