@@ -4,6 +4,9 @@ from common import InvalidRunError, ModdedDataError, StSGlobals
 
 in_file = "the_guardian_ironclad.json"
 
+CHOICE_CARDS = ['Armaments', 'Headbutt', 'Headbutt+1', 'True Grit+1', 'Warcry', 'Warcry+1',
+                'Burning Pact', 'Burning Pact+1', 'Dual Wield', 'Dual Wield+1']
+
 def out_file(i):
   return f"the_guardian_ironclad{i}.json"
 
@@ -16,7 +19,9 @@ def remove_invalid(card):
   """Removes cards from the deck that are considered invalid for training purposes"""
   for i in range(len(card)):
     # remove all curses and colorless cards from the decks
-    card[i] = list(filter(lambda card: card not in StSGlobals.BASE_GAME_CURSES and card not in StSGlobals.BASE_GAME_COLORLESS_AND_UPGRADES, card[i]))
+    card[i] = list(filter(lambda card: card not in StSGlobals.BASE_GAME_CURSES
+                          and card not in StSGlobals.BASE_GAME_COLORLESS_AND_UPGRADES
+                          and card not in CHOICE_CARDS, card[i]))
 
 split_count = 32
 

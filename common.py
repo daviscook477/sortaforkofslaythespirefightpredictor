@@ -224,6 +224,18 @@ class StSGlobals:
                         'Adaptation', 'MentalFortress', 'Study', 'Devotion', 'Nirvana', 'MasterReality',
                         'Sadistic Nature', 'LiveForever', 'BecomeAlmighty', 'Panache', 'Mayhem', 'Magnetism', 'Omega'}
 
+    BASE_GAME_COLORLESS = {'Shiv', 'Dramatic Entrance', 'RitualDagger', 'Bite',
+                         'Smite', 'Expunger', 'HandOfGreed', 'Flash of Steel', 'ThroughViolence', 'Swift Strike',
+                         'Mind Blast', 'Beta', 'Dark Shackles', 'J.A.X.', 'PanicButton', 'Trip', 'FameAndFortune',
+                        'Impatience', 'The Bomb', 'Insight', 'Miracle', 'Blind', 'Bandage Up', 'Secret Technique',
+                        'Deep Breath', 'Violence', 'Secret Weapon', 'Apotheosis', 'Forethought', 'Enlightenment',
+                        'Purity', 'Panacea', 'Transmutation', 'Ghostly', 'Chrysalis', 'Discovery', 'Finesse',
+                        'Master of Strategy', 'Good Instincts', 'Jack Of All Trades', 'Safety', 'Metamorphosis',
+                        'Thinking Ahead', 'Madness', 'Sadistic Nature', 'LiveForever', 'BecomeAlmighty', 'Panache', 
+                        'Mayhem', 'Magnetism', 'Omega'}
+
+    BASE_GAME_COLORLESS_AND_UPGRADES = BASE_GAME_COLORLESS | {upgrade_card(x) for x in BASE_GAME_COLORLESS}
+
     BASE_GAME_POWERS_AND_UPGRADES = BASE_GAME_POWERS | {upgrade_card(x) for x in BASE_GAME_POWERS}
 
     BASE_GAME_TEMP_POWERS = {'Omega'}
