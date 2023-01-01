@@ -115,13 +115,13 @@ class Run:
         self.process_neow()
         for floor in range(1, self.run['floor_reached'] + 1):
             logger.debug(f'Deck at floor {floor}: {self.current_deck}')
+            self.process_battle(floor)
             self.process_relics(floor)
             self.process_card_choice(floor)
             self.process_campfire_choice(floor)
             self.process_purchases(floor)
             self.process_purges(floor)
             self.process_events(floor)
-            self.process_battle(floor)
         return self.processed_fights
 
 
