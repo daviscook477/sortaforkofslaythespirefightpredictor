@@ -1,10 +1,13 @@
 import json
 
-out_file = "hexaghost_ironclad.json"
-in_files = ["out\\2020-09-03\\data_2020-09-03_0.json",
-"out\\2020-09-03\\data_2020-09-03_1.json",
-"out\\2020-09-03\\data_2020-09-03_2.json",
-"out\\2020-09-03\\data_2020-09-03_3.json"]
+out_file = "the_guardian_ironclad.json"
+in_files = ["C:\\Users\davis\Documents\Slay the Spire Runs\\2023-01-01\\data_2023-01-01_0.json",
+"C:\\Users\davis\Documents\Slay the Spire Runs\\2023-01-01\\data_2023-01-01_1.json",
+"C:\\Users\davis\Documents\Slay the Spire Runs\\2023-01-01\\data_2023-01-01_2.json",
+"C:\\Users\davis\Documents\Slay the Spire Runs\\2023-01-01\\data_2023-01-01_3.json",
+"C:\\Users\davis\Documents\Slay the Spire Runs\\2023-01-01\\data_2023-01-01_4.json",
+"C:\\Users\davis\Documents\Slay the Spire Runs\\2023-01-01\\data_2023-01-01_5.json",
+"C:\\Users\davis\Documents\Slay the Spire Runs\\2023-01-01\\data_2023-01-01_6.json"]
 
 def main():
     cards = []
@@ -13,6 +16,9 @@ def main():
             json_data = json.load(f1)
             for run in json_data:
                 for encounter in run:
+                    # skip any run that lost at this fight
+                    if encounter['entering_hp'] - encounter['damage_taken'] <= 0:
+                        break
                     # skip any run thats not the ironclad
                     if encounter['character'] != 'IRONCLAD':
                         break
@@ -20,10 +26,10 @@ def main():
                     # this should filter out bad players
                     # that are making terrible deck decisions
                     # from impacting the results too much
-                    if encounter['ascension'] < 20:
+                    if encounter['ascension'] < 15:
                         break
                     # only look at the specific encounter once per run
-                    if encounter['encounter'] == 'Hexaghost':
+                    if encounter['encounter'] == 'The Guardian':
                         cards.append(encounter['cards'])
                         break
 
