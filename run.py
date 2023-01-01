@@ -121,67 +121,68 @@ class Run:
             self.process_purchases(floor)
             self.process_purges(floor)
             self.process_events(floor)
-        return self.processed_card_choices
+            self.process_battle(floor)
+        return self.processed_fights
 
 
-    # def process_battle(self, floor):
-    #     battle_stat = self.stats_by_floor['battle_stats_by_floor'].get(floor)
-    #     if battle_stat:
-    #         fight_data = dict()
-    #         fight_data['cards'] = list(self.current_deck)
-    #         fight_data['relics'] = list(self.current_relics)
-    #         # when on floor 1 need to special case to figure out the player max hp (just check max hp at start)
-    #         # and to get the entering hp we need to look at current hp (after the first battle) + whatever damage was taken during that battle
-    #         # otherwise b/c the index of the floor is floor - 1 (looking at floor - 2 = index - 1) lets us just check whatever the hp
-    #         # was at the end of the last floor
-    #         fight_data['max_hp'] = self.run['max_hp_per_floor'][floor - 2] if floor > 1 else self.run['max_hp_per_floor'][0]
-    #         fight_data['entering_hp'] = self.run['current_hp_per_floor'][floor - 2] if floor > 1 else min(self.run['current_hp_per_floor'][0] + battle_stat['damage'], self.run['max_hp_per_floor'][0])
-    #         fight_data['character'] = self.run['character_chosen']
-    #         fight_data['ascension'] = self.run['ascension_level']
-    #         fight_data['floor'] = floor
-    #         fight_data['damage_taken'] = self.get_hp_change(battle_stat, floor)
-    #         fight_data['encounter'] = battle_stat['enemies']
-    #         next_boss_floor, fight_data['next_boss'] = self.get_next_boss(floor)
-    #         fight_data['score'] = self.end_game_stats['score']
-    #         fight_data['won'] = self.end_game_stats['won']
-    #         fight_data['gold'] = self.run['gold_per_floor'][floor - 2]
-    #         fight_data['remaining_encounters'] = self.get_remaining_encounters(floor, next_boss_floor)
-    #         self.processed_fights.append(fight_data)
+    def process_battle(self, floor):
+        battle_stat = self.stats_by_floor['battle_stats_by_floor'].get(floor)
+        if battle_stat:
+            fight_data = dict()
+            fight_data['cards'] = list(self.current_deck)
+            fight_data['relics'] = list(self.current_relics)
+            # when on floor 1 need to special case to figure out the player max hp (just check max hp at start)
+            # and to get the entering hp we need to look at current hp (after the first battle) + whatever damage was taken during that battle
+            # otherwise b/c the index of the floor is floor - 1 (looking at floor - 2 = index - 1) lets us just check whatever the hp
+            # was at the end of the last floor
+            fight_data['max_hp'] = self.run['max_hp_per_floor'][floor - 2] if floor > 1 else self.run['max_hp_per_floor'][0]
+            fight_data['entering_hp'] = self.run['current_hp_per_floor'][floor - 2] if floor > 1 else min(self.run['current_hp_per_floor'][0] + battle_stat['damage'], self.run['max_hp_per_floor'][0])
+            fight_data['character'] = self.run['character_chosen']
+            fight_data['ascension'] = self.run['ascension_level']
+            fight_data['floor'] = floor
+            fight_data['damage_taken'] = self.get_hp_change(battle_stat, floor)
+            fight_data['encounter'] = battle_stat['enemies']
+            next_boss_floor, fight_data['next_boss'] = self.get_next_boss(floor)
+            fight_data['score'] = self.end_game_stats['score']
+            fight_data['won'] = self.end_game_stats['won']
+            fight_data['gold'] = self.run['gold_per_floor'][floor - 2]
+            fight_data['remaining_encounters'] = self.get_remaining_encounters(floor, next_boss_floor)
+            self.processed_fights.append(fight_data)
 
-    # def get_hp_change(self, battle_stat, floor):
-    #     # when on floor 1 need to special case the battle damage b/c we won't have
-    #     # info about hp change yet (since that requires at least 2 floors)
-    #     if floor <= 1:
-    #         # also we are special casing burning blood so ironclad fights on floor 0 don't look too weird
-    #         hp_change = battle_stat['damage'] - 6 if 'Burning Blood' in self.current_relics else + 0
-    #     elif self.run['current_hp_per_floor'] == 0:
-    #         hp_change = battle_stat['damage']
-    #     else:
-    #         hp_change = self.run['current_hp_per_floor'][floor - 2] - self.run['current_hp_per_floor'][floor - 1]
-    #     return hp_change
+    def get_hp_change(self, battle_stat, floor):
+        # when on floor 1 need to special case the battle damage b/c we won't have
+        # info about hp change yet (since that requires at least 2 floors)
+        if floor <= 1:
+            # also we are special casing burning blood so ironclad fights on floor 0 don't look too weird
+            hp_change = battle_stat['damage'] - 6 if 'Burning Blood' in self.current_relics else + 0
+        elif self.run['current_hp_per_floor'] == 0:
+            hp_change = battle_stat['damage']
+        else:
+            hp_change = self.run['current_hp_per_floor'][floor - 2] - self.run['current_hp_per_floor'][floor - 1]
+        return hp_change
 
-    # def get_remaining_encounters(self, floor, next_boss_floor):
-    #     """
-    #     Used to get the remaining floors of certain encounter types before the Act Boss.
-    #     encounter types are defined as follows: can be within the following:
-    #         'M' - monster
-    #         '$' - shop
-    #         'E' - elite
-    #         'R' - rest (AKA campfire)
-    #         'BOSS' - act boss
-    #         'T' - treasure
-    #         '?' - event
-    #     """
-    #     encounter_types = ['M', '$', 'E', 'R', 'T', '?']
-    #     remaining_path = self.end_game_stats['path_taken'][floor - 1: next_boss_floor]
+    def get_remaining_encounters(self, floor, next_boss_floor):
+        """
+        Used to get the remaining floors of certain encounter types before the Act Boss.
+        encounter types are defined as follows: can be within the following:
+            'M' - monster
+            '$' - shop
+            'E' - elite
+            'R' - rest (AKA campfire)
+            'BOSS' - act boss
+            'T' - treasure
+            '?' - event
+        """
+        encounter_types = ['M', '$', 'E', 'R', 'T', '?']
+        remaining_path = self.end_game_stats['path_taken'][floor - 1: next_boss_floor]
 
-    #     # Get encounter indices
-    #     remaining_encounters = {
-    #         encounter_type: len([i for i in remaining_path if i == encounter_type])
-    #         for encounter_type in encounter_types
-    #     }
+        # Get encounter indices
+        remaining_encounters = {
+            encounter_type: len([i for i in remaining_path if i == encounter_type])
+            for encounter_type in encounter_types
+        }
 
-    #     return remaining_encounters
+        return remaining_encounters
 
     def get_next_boss(self, floor):
         next_boss_floor = 999
